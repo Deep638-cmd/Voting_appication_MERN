@@ -14,7 +14,7 @@ const Check = () => {
   const didi = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/candidate/vote`, {
+      const response = await fetch(`https://voting-appication-mern.onrender.com/candidate/vote`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("Token")}`

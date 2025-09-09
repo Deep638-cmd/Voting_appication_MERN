@@ -32,8 +32,8 @@ console.log("The getiing data from localstorage is: ",localStorage.getItem("User
     try {
       // Determine the endpoint based on user role
       const endpoint = Role === 'voter' 
-        ? 'http://localhost:3000/voter/ChangePassword'
-        : 'http://localhost:3000/candidate/changepassword';
+        ? 'https://voting-appication-mern.onrender.com/voter/ChangePassword'
+        : 'https://voting-appication-mern.onrender.com/candidate/changepassword';
 
       const response = await fetch(endpoint, {
         method: 'PUT',

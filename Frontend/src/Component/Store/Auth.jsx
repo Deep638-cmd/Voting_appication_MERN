@@ -13,7 +13,7 @@ const isAuthenticated = !!token;
 
 const gandu = async () => {
   try {
-    const response = await fetch(`http://localhost:3000/candidate/out`, {
+    const response = await fetch(`https://voting-appication-mern.onrender.com/candidate/out`, {
       method: "GET",
       // headers: {
       //   Authorization: `Bearer ${token}`,

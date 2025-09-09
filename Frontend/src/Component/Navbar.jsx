@@ -18,7 +18,7 @@ const Navbar = () => {
   const checkUserRole = async () => {
     try {
       // Try voter check first
-      const voterResponse = await fetch(`http://localhost:3000/voter/get`, {
+      const voterResponse = await fetch(`https://voting-appication-mern.onrender.com/voter/get`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("Token")}`
@@ -36,7 +36,7 @@ const Navbar = () => {
       }
 
       // If not voter, check for candidate
-      const candidateResponse = await fetch(`http://localhost:3000/candidate/get`, {
+      const candidateResponse = await fetch(`https://voting-appication-mern.onrender.com/candidate/get`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("Token")}`

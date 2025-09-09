@@ -48,7 +48,7 @@ if (formData.password !== formData.confirmPassword) {
     console.log(formData);
 try{
   let datas={...formData};
-  const response=await fetch(`http://localhost:3000/${datas.role}/register`,{
+  const response=await fetch(`https://voting-appication-mern.onrender.com/${datas.role}/register`,{
 method: "POST",
       headers: {
         "Content-Type": "application/json"

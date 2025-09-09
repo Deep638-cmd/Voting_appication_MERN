@@ -20,7 +20,7 @@ const Vote = () => {
   // Check if user has already voted
   const checkVotingStatus = async () => {
     try {
-      const response = await fetch('http://localhost:3000/voter/get', {
+      const response = await fetch('https://voting-appication-mern.onrender.com/voter/get', {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("Token")}`
@@ -49,7 +49,7 @@ const Vote = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3000/voter/vote', {
+      const response = await fetch('https://voting-appication-mern.onrender.com/voter/vote', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
