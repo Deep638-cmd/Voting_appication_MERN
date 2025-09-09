@@ -8,8 +8,7 @@ dotenv.config();
 import route1 from "./Routers/voter_router.js"
 import route2 from "./Routers/Candidate_router.js"
 app.use(express.json());
-app.use(cors(
-));
+app.use(cors());
 
 app.use("/voter",route1);
 app.use("/candidate",route2);
