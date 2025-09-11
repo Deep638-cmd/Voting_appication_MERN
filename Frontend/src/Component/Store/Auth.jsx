@@ -1,81 +1,74 @@
 import { createContext, useContext, useEffect, useState } from "react";
-export const AuthContext=createContext();
-export  const AuthProvider=({children})=>{
-const[candidate,setcandidate]=useState();
-  const [token, setToken] = useState(localStorage.getItem("Token"));
-const Localstorage=(tokens)=>{
-setToken(tokens);
-localStorage.setItem("Token",tokens)
-}
 
-const isAuthenticated = !!token;
+export const AuthContext = createContext();
 
+export const AuthProvider = ({ children }) => {
+  const [candidate, setCandidate] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("Token") || null);
+  const [role, setRole] = useState(localStorage.getItem("UserRole") || null);
 
-const gandu = async () => {
-  try {
-    const response = await fetch(`https://voting-appication-mern.onrender.com/candidate/out`, {
-      method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${token}`,
-      // },
-    });
+  const isAuthenticated = !!token;
 
-    if (response.ok) {
-      const data = await response.json();  // ✅ await here
-      console.log(data);
-      console.log("type",typeof(data))
+  // ✅ Login function (store in both state + localStorage)
+  const login = (tokens, userRole) => {
+    setToken(tokens);
+    setRole(userRole);
+    localStorage.setItem("Token", tokens);
+    localStorage.setItem("UserRole", userRole);
+  };
 
-      setcandidate(data)
-      
-    } else {
-      console.error("Error fetching candidate:", response.status);
+  // ✅ Logout function
+  const logout = () => {
+    setToken(null);
+    setRole(null);
+    setCandidate(null);
+    localStorage.removeItem("Token");
+    localStorage.removeItem("UserRole");
+  };
+
+  // ✅ Fetch candidate details if token & role exist
+  const fetchCandidate = async () => {
+    if (!token || role !== "candidate") return; // only fetch if logged in as candidate
+    try {
+      const response = await fetch(
+        `https://voting-appication-mern.onrender.com/candidate/out`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setCandidate(data);
+      } else {
+        console.error("Error fetching candidate:", response.status);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
     }
-  } catch (err) {
-    console.log(err);
-  }
-};
-useEffect(() => {
-    gandu();
-  }, []);
+  };
 
+  useEffect(() => {
+    fetchCandidate();
+  }, [token, role]);
 
-const logout=()=>{
-setToken("");
-return {Token: localStorage.removeItem("Token"),
-  Role : localStorage.removeItem("UserRole")}
-
-
-
-  }
-
-
-   
-
-
-
-
-
-
-
-
-   return (
-       <AuthContext.Provider value={{
-        Localstorage,
-        token,
-        candidate,
+  return (
+    <AuthContext.Provider
+      value={{
+        login,
         logout,
+        token,
+        role,
+        candidate,
         isAuthenticated,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-       }}>
-{children}
-       </AuthContext.Provider>
-     );
-
-
-
-
- }
- 
-    export const useAuth=()=>{
-return useContext(AuthContext);
-    }
+export const useAuth = () => useContext(AuthContext);

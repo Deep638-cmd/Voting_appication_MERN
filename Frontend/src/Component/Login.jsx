@@ -12,7 +12,8 @@ const Login = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
-  const { Localstorage } = useAuth();
+ const { login } = useAuth();
+
   const [role, setrole] = useState(null);
 
   // Form states
@@ -111,7 +112,8 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         setrole(formData.role);
-        Localstorage(data.token);
+        //Localstorage(data.token);
+        login(data.token, formData.role)
         localStorage.setItem("UserRole", formData.role);
         toast.success(`Logged in successfully as ${formData.role}`);
         
