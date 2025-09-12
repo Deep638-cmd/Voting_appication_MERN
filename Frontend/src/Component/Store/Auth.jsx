@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCandidate();
-  }, [token, role]);
+  }, []);
 
   return (
     <AuthContext.Provider
