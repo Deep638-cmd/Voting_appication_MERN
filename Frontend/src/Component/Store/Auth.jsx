@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ✅ Fetch candidate details if token & role exist
-  const fetchCandidate = async () => {
+  const  fetchCandidate = async () => {
     if (!token || role !== "candidate") return; // only fetch if logged in as candidate
     try {
       const response = await fetch(
