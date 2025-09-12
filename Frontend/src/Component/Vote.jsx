@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 const Vote = () => {
   const navigate = useNavigate();
   const { candidate } = useAuth();
-  console.log(candidate)
+  console.log("KANKI",{candidate})
   // State management
   const [hasVoted, setHasVoted] = useState(false);
   const [loading, setLoading] = useState(false);
