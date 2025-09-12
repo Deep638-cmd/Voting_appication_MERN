@@ -34,15 +34,15 @@ export const AuthProvider = ({ children }) => {
         `https://voting-appication-mern.onrender.com/candidate/out`,
         {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
+        console.log("AUTH DATA",data)
         setCandidate(data);
       } else {
         console.error("Error fetching candidate:", response.status);
