@@ -11,8 +11,9 @@ const Login = () => {
   const [showPasswordRules, setShowPasswordRules] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
- const { login } = useAuth();
+  const { login } = useAuth();
 
   const [role, setrole] = useState(null);
 
@@ -91,44 +92,72 @@ const Login = () => {
     }
   };
 
-  // Handle form submission
+  // Handle form submission with optimizations
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isLoading) return;
 
     if (!formData.email || !formData.password || !formData.role) {
       toast.error("Please fill in all required fields");
       return;
     }
 
+    setIsLoading(true); // Set loading state
+
     try {
+      // Add timeout and better error handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch(`https://voting-appication-mern.onrender.com/${formData.role}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        signal: controller.signal // Add abort signal
       });
+
+      clearTimeout(timeoutId); // Clear timeout if request completes
 
       if (response.ok) {
         const data = await response.json();
         setrole(formData.role);
-        //Localstorage(data.token);
-        login(data.token, formData.role)
-        localStorage.setItem("UserRole", formData.role);
+        
+        // Execute these operations in parallel
+        await Promise.all([
+          login(data.token, formData.role),
+          localStorage.setItem("UserRole", formData.role)
+        ]);
+        
         toast.success(`Logged in successfully as ${formData.role}`);
         
+        // Reduce navigation delay
         setTimeout(() => {
           navigate("/");
-        }, 1500);
+        }, 500); // Reduced from 1500ms to 500ms
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Login failed");
       }
     } catch (err) {
       console.error(err);
-      toast.error("An error occurred during login");
+      
+      // Better error messaging
+      if (err.name === 'AbortError') {
+        toast.error("Request timed out. Please check your connection and try again.");
+      } else if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+        toast.error("Network error. Please check your internet connection.");
+      } else {
+        toast.error("An error occurred during login. Please try again.");
+      }
+    } finally {
+      setIsLoading(false); // Always reset loading state
     }
 
+    // Only reset form on success or specific errors
     setFormData({
       email: "",
       password: "",
@@ -162,6 +191,7 @@ const Login = () => {
               value={formData.role}
               onChange={handleRoleChange}
               className={inputClass}
+              disabled={isLoading}
               required
             >
               <option value="">Select your role</option>
@@ -180,6 +210,7 @@ const Login = () => {
               onChange={handleChange}
               className={inputClass}
               placeholder="Enter your email"
+              disabled={isLoading}
               required
               onFocus={() => setShowEmailRules(true)}
               onBlur={() => setShowEmailRules(false)}
@@ -199,6 +230,7 @@ const Login = () => {
                 onChange={handleChange}
                 className={`${inputClass} pr-10`}
                 placeholder="Enter your password"
+                disabled={isLoading}
                 required
                 onFocus={() => setShowPasswordRules(true)}
                 onBlur={() => setShowPasswordRules(false)}
@@ -207,6 +239,7 @@ const Login = () => {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                disabled={isLoading}
               >
                 {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
               </button>
@@ -215,14 +248,37 @@ const Login = () => {
             {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button with Loading State */}
           <button
             type="submit"
-            className={`${buttonClass} bg-green-600 text-white hover:bg-green-700`}
+            disabled={isLoading}
+            className={`${buttonClass} ${
+              isLoading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'
+            } text-white flex items-center justify-center`}
           >
-            Login
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
+
+        {/* Connection Status Indicator */}
+        {isLoading && (
+          <div className="mt-4 text-center text-sm text-gray-600">
+            <p>Connecting to server...</p>
+            <p className="text-xs mt-1">This may take a moment if the server is starting up</p>
+          </div>
+        )}
       </div>
     </div>
   );
